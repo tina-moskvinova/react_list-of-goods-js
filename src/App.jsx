@@ -3,42 +3,53 @@ import 'bulma/css/bulma.css';
 import './App.scss';
 
 export const goodsFromServer = [
-  'Dumplings',
-  'Carrot',
-  'Eggs',
-  'Ice cream',
-  'Apple',
-  'Bread',
-  'Fish',
-  'Honey',
-  'Jam',
-  'Garlic',
+  'Dumplings', 'Carrot', 'Eggs', 'Ice cream', 'Apple',
+  'Bread', 'Fish', 'Honey', 'Jam', 'Garlic',
 ];
 
 export const App = () => {
   const [goods, setGoods] = useState(goodsFromServer);
-  const [sortType, setSortType] = useState(null);
+  const [sortType, setSortType] = useState(null); // 'alphabet', 'length'
   const [isReversed, setIsReversed] = useState(false);
 
-  const handleAlphabetSort = () => {
-    const sorted = [...goodsFromServer].sort((a, b) => a.localeCompare(b));
+  const getSortedGoods = (type, reversed) => {
+    let sorted = [...goodsFromServer];
 
-    setGoods(isReversed ? sorted.reverse() : sorted);
-    setSortType('alphabet');
+    switch (type) {
+      case 'alphabet':
+        sorted.sort((a, b) => a.localeCompare(b));
+        break;
+      case 'length':
+        sorted.sort((a, b) => a.length - b.length);
+        break;
+      default:
+        // no sorting
+        break;
+    }
+
+    if (reversed) {
+      sorted.reverse();
+    }
+
+    return sorted;
+  };
+
+  const handleAlphabetSort = () => {
+    const newType = 'alphabet';
+    setSortType(newType);
+    setGoods(getSortedGoods(newType, isReversed));
   };
 
   const handleLengthSort = () => {
-    const sorted = [...goodsFromServer].sort((a, b) => a.length - b.length);
-
-    setGoods(isReversed ? sorted.reverse() : sorted);
-    setSortType('length');
+    const newType = 'length';
+    setSortType(newType);
+    setGoods(getSortedGoods(newType, isReversed));
   };
 
   const handleReverse = () => {
-    const newGoods = [...goods].reverse();
-
-    setGoods(newGoods);
-    setIsReversed(!isReversed);
+    const newReversed = !isReversed;
+    setIsReversed(newReversed);
+    setGoods(getSortedGoods(sortType, newReversed));
   };
 
   const handleReset = () => {
@@ -89,9 +100,7 @@ export const App = () => {
 
       <ul>
         {goods.map(item => (
-          <li key={item} data-cy="Good">
-            {item}
-          </li>
+          <li key={item} data-cy="Good">{item}</li>
         ))}
       </ul>
     </div>
