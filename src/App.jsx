@@ -1,96 +1,89 @@
 import { useState } from 'react';
+import classNames from 'classnames';
 import 'bulma/css/bulma.css';
 import './App.scss';
 
-export const goodsFromServer = [
-  'Dumplings', 'Carrot', 'Eggs', 'Ice cream', 'Apple',
-  'Bread', 'Fish', 'Honey', 'Jam', 'Garlic',
+const SORT_GOODS_NAME = 'name';
+const SORT_GOODS_LENGTH = 'length';
+
+const goodsFromServer = [
+  'Dumplings',
+  'Carrot',
+  'Eggs',
+  'Ice cream',
+  'Apple',
+  'Bread',
+  'Fish',
+  'Honey',
+  'Jam',
+  'Garlic',
 ];
 
 export const App = () => {
-  const [goods, setGoods] = useState(goodsFromServer);
-  const [sortType, setSortType] = useState(null); // 'alphabet', 'length'
+  const [baseGoods, setBaseGoods] = useState(goodsFromServer);
+  const [sortField, setSortField] = useState('');
   const [isReversed, setIsReversed] = useState(false);
 
-  const getSortedGoods = (type, reversed) => {
-    let sorted = [...goodsFromServer];
+  const sorted = [...goodsFromServer];
 
-    switch (type) {
-      case 'alphabet':
-        sorted.sort((a, b) => a.localeCompare(b));
-        break;
-      case 'length':
-        sorted.sort((a, b) => a.length - b.length);
-        break;
-      default:
-        // no sorting
-        break;
-    }
+  if (sortField === SORT_GOODS_NAME) {
+    sorted.sort((a, b) => a.localeCompare(b));
+  } else if (sortField === SORT_GOODS_LENGTH) {
+    sorted.sort((a, b) => a.length - b.length);
+  }
 
-    if (reversed) {
-      sorted.reverse();
-    }
-
-    return sorted;
-  };
-
-  const handleAlphabetSort = () => {
-    const newType = 'alphabet';
-    setSortType(newType);
-    setGoods(getSortedGoods(newType, isReversed));
-  };
-
-  const handleLengthSort = () => {
-    const newType = 'length';
-    setSortType(newType);
-    setGoods(getSortedGoods(newType, isReversed));
-  };
-
-  const handleReverse = () => {
-    const newReversed = !isReversed;
-    setIsReversed(newReversed);
-    setGoods(getSortedGoods(sortType, newReversed));
-  };
+  if (isReversed) {
+    sorted.reverse();
+  }
 
   const handleReset = () => {
-    setGoods(goodsFromServer);
-    setSortType(null);
+    setBaseGoods(goodsFromServer);
+    setSortField('');
     setIsReversed(false);
   };
 
-  const isInitialOrder = goods.join() === goodsFromServer.join();
+  const isInitial =
+    sortField === '' &&
+    !isReversed &&
+    baseGoods.join() === goodsFromServer.join();
 
   return (
     <div className="section content">
       <div className="buttons">
         <button
           type="button"
-          className={`button is-info ${sortType === 'alphabet' ? '' : 'is-light'}`}
-          onClick={handleAlphabetSort}
+          className={classNames('button', 'is-info', {
+            'is-light': sortField !== SORT_GOODS_NAME,
+          })}
+          onClick={() => setSortField(SORT_GOODS_NAME)}
         >
           Sort alphabetically
         </button>
 
         <button
           type="button"
-          className={`button is-success ${sortType === 'length' ? '' : 'is-light'}`}
-          onClick={handleLengthSort}
+          className={classNames('button', 'is-success', {
+            'is-light': sortField !== SORT_GOODS_LENGTH,
+          })}
+          onClick={() => setSortField(SORT_GOODS_LENGTH)}
         >
           Sort by length
         </button>
 
         <button
           type="button"
-          className={`button is-warning ${isReversed ? '' : 'is-light'}`}
-          onClick={handleReverse}
+          className={classNames('button', 'is-warning', {
+            'is-light': !isReversed,
+          })}
+          onClick={() => setIsReversed(prevValue => !prevValue)}
         >
           Reverse
         </button>
 
-        {!isInitialOrder && (
+        {!isInitial && (
           <button
             type="button"
-            className="button is-danger"
+            className="button is-danger is-light"
             onClick={handleReset}
           >
             Reset
@@ -99,8 +92,10 @@ export const App = () => {
       </div>
 
       <ul>
-        {goods.map(item => (
-          <li key={item} data-cy="Good">{item}</li>
+        {sorted.map(good => (
+          <li key={good} data-cy="Good">
+            {good}
+          </li>
         ))}
       </ul>
     </div>
